@@ -1,0 +1,113 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<audio id="player" controls></audio>
+</body>
+<script>
+  const player = document.getElementById('player');
+
+  const handleSuccess = function(stream) {
+    if (window.URL) {
+      player.srcObject = stream;
+    } else {
+      player.src = stream;
+    }
+  };
+
+    player.addEventListener('pause', function(e) {
+    	console.log(player);
+    });
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(handleSuccess);
+</script>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Voice Recognizer</title>
+	    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+        <div class="app" style="text-align: center;"> 
+            <h3>Add New Note</h3>
+            <div class="input-single" style="padding-left: 10%;padding-right: 10%;padding-top: 2%;padding-bottom: 2%">
+             <textarea id="note-textarea" class="form-control" placeholder="Create a new note by typing or using voice recognition." rows="6"></textarea>
+            </div>         
+            <button id="start-record-btn" class="btn btn-success" title="Start Recording">Start Recognition</button>
+            <button id="stop-record-btn" class="btn btn-danger" title="Stop Recording">Stop Recognition</button>
+            <button id="clear-note-btn" class="btn btn-secondary" title="Clear Note">Clear</button>  
+            <p id="recording-instructions">Press the <strong>Start Recognition</strong> button and allow access.</p>
+        </div>
+</body>
+<script>
+	try {
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var recognition = new SpeechRecognition();
+}
+catch(e) {
+  console.error(e);
+}
+
+var noteTextarea = document.getElementById('note-textarea');
+var instructions = document.getElementById('recording-instructions');
+var noteContent = '';
+
+recognition.continuous = true;
+
+recognition.onresult = function(event) {
+  var current = event.resultIndex;
+
+  var transcript = event.results[current][0].transcript;
+
+  var mobileRepeatBug = (current == 1 && transcript == event.results[0][0].transcript);
+
+  if(!mobileRepeatBug) {
+    noteContent += transcript;
+    noteTextarea.value = noteContent;
+  }
+};
+
+recognition.onstart = function() { 
+  instructions.innerHTML = 'Voice recognition activated. Try speaking into the microphone.';
+}
+
+recognition.onspeechend = function() {
+  instructions.innerHTML = 'You were quiet for a while so voice recognition turned itself off.';
+}
+
+recognition.onerror = function(event) {
+  if(event.error == 'no-speech') {
+    instructions.innerHTML = 'No speech was detected. Try again.';  
+  };
+}
+
+document.getElementById('start-record-btn').addEventListener('click', function(e) {
+  if (noteContent.length) {
+    noteContent += ' ';
+  }
+  recognition.start();
+});
+
+
+document.getElementById('stop-record-btn').addEventListener('click', function(e) {
+  recognition.stop();
+  instructions.innerHTML = 'Voice recognition Stopped.';
+});
+
+noteTextarea.addEventListener('input', function() {
+  noteContent = noteTextarea.value;
+});
+
+document.getElementById('clear-note-btn').addEventListener('click', function(e) {
+	noteTextarea.value = "";
+	instructions.innerHTML = 'Press the Start Recognition button and allow access.';
+});
+
+
+</script>
+</html>
